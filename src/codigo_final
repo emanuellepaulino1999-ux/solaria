@@ -1,0 +1,165 @@
+import java.util.Scanner;
+
+package src;
+
+public class jogo_rpg {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		Scanner leia = new Scanner(System.in);
+		
+
+		System.out.println("--- SOLARIA ---");
+		
+		
+
+		 // PERSONAGEM (Com validação de opção inválida)
+		int opcaoGenero = 0;
+		while (opcaoGenero != 1 && opcaoGenero != 2) {
+			System.out.println("Escolha seu personagem:");
+		    System.out.println("1. ZION (Guardião)");
+		    System.out.println("2. NURI (Guardiã)");
+		    opcaoGenero = leia.nextInt();
+		    
+            if (opcaoGenero != 1 && opcaoGenero != 2) {
+                System.out.println("\n[ERRO] Opção inválida! Escolha 1 ou 2.\n");
+		            }
+		        }
+
+		        String titulo;
+		        if (opcaoGenero == 2) {
+		            titulo = "Guardiã";
+		        } else {
+		            titulo = "Guardião";
+		        }
+
+		        System.out.println("\nBem-vindo(a), " + titulo + "! A harmonia foi destruída por Galactus.");
+		        System.out.println("Sua missão é recuperar as joias sagradas e restaurar a luz.");
+
+		        // =====================================================
+		        // MATRIZ 2D DE FASES
+		        // Coluna [0] = local | Coluna [1] = nome do inimigo
+		        // =====================================================
+		        String[][] dadosFases = new String[][] {
+		            {"Deserto da Solidão", "Nythera"},
+		            {"Vulcão de Aurion",   "Vyrion"},
+		            {"Caverna Lunar",      "Nux"},
+		            {"Castelo de Solaria", "Galactus"}
+		        };
+
+		        // Dados das Fases (HP e Dano — progressão de 50% como no V4)
+		        double hpUsuarioBase = 100;
+		        double hpInimigoBase = 150;
+		        double danoBase = 20;
+
+		        for (int fase = 0; fase < dadosFases.length; fase++) {
+
+		            String local   = dadosFases[fase][0];
+		            String inimigo = dadosFases[fase][1];
+
+		            // Narrativa de Ambiente e Inimigo
+		            System.out.println("\n========================================");
+		            if (fase == 0) {
+		                System.out.println("AMBIENTE: O " + local + " estende-se à sua frente. O calor drena suas forças.");
+		                System.out.println("INIMIGO: " + inimigo + " surge das areias. O " + titulo + " sente uma presença sombria.");
+		            } else if (fase == 1) {
+		                System.out.println("AMBIENTE: No " + local + ", rios de magma cercam o caminho.");
+		                System.out.println("INIMIGO: " + inimigo + " bloqueia a passagem com sua armadura incandescente.");
+		            } else if (fase == 2) {
+		                System.out.println("AMBIENTE: A " + local + " é um labirinto de ecos e sombras lunares.");
+		                System.out.println("INIMIGO: " + inimigo + " flutua no vazio, pronta para confundir o " + titulo + ".");
+		            } else if (fase == 3) {
+		                System.out.println("AMBIENTE: O " + local + " está irreconhecível, tomado por trevas absolutas.");
+		                System.out.println("INIMIGO: Galactus, o Devorador de Luz, aguarda pelo confronto final.");
+		            }
+		            System.out.println("========================================");
+
+		            // Progressão de 50% por fase (igual ao V4 original)
+		            double multiplicador = 1.0;
+		            for (int m = 0; m < fase; m++) {
+		                multiplicador *= 1.5;
+		            }
+
+		            double hpUsuario = hpUsuarioBase * multiplicador;
+		            double hpInimigo = hpInimigoBase * multiplicador;
+		            double danoFase  = danoBase * multiplicador;
+
+		            boolean contragolpeDisponivel = true;
+		            boolean usuarioVenceuFase = false;
+
+		            // Loop de 6 Rounds
+		            for (int round = 1; round <= 6; round++) {
+		                System.out.println("\n--- ROUND " + round + " / 6 ---");
+
+		                double danoInimigoTurno = danoFase;
+		                System.out.println(inimigo + " ataca o " + titulo + " causando " + danoInimigoTurno + " de dano!");
+
+		                System.out.println("Sua vez! Escolha sua ação:");
+		                System.out.println("1. Ataque | 2. Defesa | 3. Contragolpe (1x por fase)");
+		                int escolha = leia.nextInt();
+
+		                if (escolha == 1) {
+		                    System.out.println("Você contra-atacou com força!");
+		                    hpInimigo -= danoFase;
+		                } else if (escolha == 2) {
+		                    System.out.println("Defesa acionada! Dano do inimigo reduzido.");
+		                    danoInimigoTurno /= 2;
+		                } else if (escolha == 3) {
+		                    if (contragolpeDisponivel) {
+		                        System.out.println("CONTRAGOLPE! Dano anulado e refletido!");
+		                        hpInimigo -= danoFase;
+		                        danoInimigoTurno = 0;
+		                        contragolpeDisponivel = false;
+		                    } else {
+		                        System.out.println("Contragolpe já utilizado! Realizando ataque simples.");
+		                        hpInimigo -= danoFase;
+		                    }
+		                } else {
+		                    System.out.println("\n[AÇÃO INVÁLIDA] Opção inexistente! Você perdeu o foco. Repetindo o round...");
+		                    round--;
+		                    continue;
+		                }
+
+		                hpUsuario -= danoInimigoTurno;
+		                System.out.println("HP " + titulo + ": " + hpUsuario + " | HP " + inimigo + ": " + hpInimigo);
+
+		                if (hpInimigo <= 0) {
+		                    System.out.println("\nInimigo derrotado! O " + titulo + " purificou " + local + ".");
+		                    usuarioVenceuFase = true;
+		                    break;
+		                }
+		                if (hpUsuario <= 0) {
+		                    break;
+		                }
+
+		                if (round == 6) {
+		                    if (hpUsuario > hpInimigo) {
+		                        System.out.println("\nFim do tempo! Vitória do " + titulo + " por maior HP.");
+		                        usuarioVenceuFase = true;
+		                    } else {
+		                        System.out.println("\nFim do tempo! O inimigo prevaleceu.");
+		                    }
+		                }
+		            }
+
+		            if (!usuarioVenceuFase) {
+		                System.out.println("\nGAME OVER. Solaria permanece nas sombras.");
+		                leia.close();
+		                return;
+		            }
+		        }
+
+		        System.out.println("\n*******************");
+		        System.out.println("PARABÉNS, " + titulo + "! Você salvou o mundo de Solaria!");
+		        System.out.println("As Joias Sagradas retornaram ao seu lugar de direito.");
+		        System.out.println("*****************");
+
+		        leia.close();
+		    }
+		
+
+	}
+
+
+}
